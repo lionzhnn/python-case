@@ -22,3 +22,4 @@ test case
     
     
     http://codingbat.com/prob/p113152
+    http://aosabook.org/en/500L/a-template-engine.html
