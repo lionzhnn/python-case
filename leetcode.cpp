@@ -7,14 +7,48 @@
 #include<stack>
 #include<algorithm>
 using namespace std;
-struct ListNode {
-	int val;
-	ListNode *next;
-	ListNode() : val(0), next(nullptr) {}
-	ListNode(int x) : val(x), next(nullptr) {}
-	ListNode(int x, ListNode *next) : val(x), next(next) {}
+ struct ListNode {
+     int val;
+     ListNode *next;
+     ListNode(int x) : val(x), next(NULL) {}
+ };
 
-};
+
+// Definition for a binary tree node.
+ struct TreeNode {
+     int val;
+     TreeNode *left;
+     TreeNode *right;
+     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ };
+ 
+
+ class CQueue {
+ public:
+	 stack<int> stack_in;
+	 stack<int> stack_out;
+	 CQueue() {
+	 }
+	 void appendTail(int value) {
+		 stack_in.push(value);
+	 }
+
+	 int deleteHead() {
+		 if (stack_out.empty()) {
+			 while (!stack_in.empty()) {
+				 stack_out.push(stack_in.top());
+				 stack_in.pop();
+			 }
+		 }
+		 if (stack_out.empty())
+			 return -1;
+		 else {
+			 int result = stack_out.top();
+			 stack_out.pop();
+			 return result;
+		 }
+	 }
+ };
 class Solution {
 public:
 	//1
