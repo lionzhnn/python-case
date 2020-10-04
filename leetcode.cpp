@@ -805,5 +805,428 @@ int stringInput() {
 			}
 		}
 		return dp[m][n];
-}
+	}
+//剑指 Offer 21. 调整数组顺序使奇数位于偶数前面
+	//双端队列
+	vector<int> exchange(vector<int>& nums) {
+		vector<int> result;
+		for (auto i = nums.begin(); i != nums.end(); i++) {
+			if (*i % 2) {
+				result.insert(result.begin(), *i);
+			}
+			else {
+				result.push_back(*i);
+			}
+		}
+		for (auto i = result.begin(); i != result.end(); i++)
+			cout << *i << endl;
+		return result;
+	}
+	//双端指针
+	vector<int> exchange_two(vector<int>& nums) {
+		int i = 0, j = nums.size() - 1;
+		while (i < j) {
+			while (i < j && (nums[i] % 2 ))
+				i++;
+			while (i < j && (nums[j] % 2 == 0))
+				j--;
+			int temp = nums[j]; nums[j] = nums[i]; nums[i] = temp;
+		}
+		return nums;
+	}
+
+	//双端队列
+	ListNode* getKthFromEnd(ListNode* head, int k) {
+		queue<ListNode*> nodes;
+		ListNode *ptr = head;
+		while (ptr) {
+			if (nodes.empty())
+				nodes.push(ptr);
+			else if (nodes.size() < k)
+				nodes.push(ptr);
+			else {
+				nodes.pop();
+				nodes.push(ptr);
+			}
+			ptr = ptr->next;
+		}
+		return (nodes.size()<k)? nullptr: nodes.front();
+	}
+	//双指针
+	ListNode* getKthFromEnd_ptr(ListNode* head, int k) {
+		ListNode *first = head, *second = head;
+		for (int i = 0; i<k && first; i++) {
+			first = first->next;
+		}
+		while (first) {
+			first = first->next;
+			second = second->next;
+		}
+		return second;
+	}
+	//循环
+	int size = 0;
+	ListNode* getKthFromEnd_three(ListNode* head, int k) {
+		if (head == nullptr)
+			return head;
+		ListNode *node = getKthFromEnd(head->next, k);
+		if (++size == k)
+			return head;
+		return node;
+	}
+
+	//剑指 Offer 24. 反转链表
+	ListNode* reverseList(ListNode* head) {
+		ListNode *new_head=NULL, *ptr;
+		while (head) {
+			ptr = head->next;
+			head->next = new_head;
+			new_head = head;
+			head = ptr;
+		}
+		return new_head;
+	}
+
+	ListNode* mergeTwoLists(ListNode* l1, ListNode* l2) {
+		ListNode *result, *ptr = result;
+		while (l1 && l2) {
+			if (l1->val <= l2->val) {
+				result->next = new ListNode(l1->val);
+				l1 = l1->next;
+				result = result->next;
+			}
+			else {
+				result->next = new ListNode(l2->val);
+				l2 = l2->next;
+				result = result->next;
+			}
+		}
+		if (l1) {
+			result->next = l1;
+		}
+		if (l2) {
+			result->next = l2;
+		}
+		return ptr->next;
+	}
+
+	vector<int> spiralOrder(vector<vector<int>>& matrix) {
+		vector<vector<bool>> flag(matrix.size(), vector<bool>(matrix[0].size(), true));
+		vector<int> result;
+		int index_i = 0, index_j = 0;
+		while (index_i >= 0 && index_i < matrix.size() && index_j >= 0 && index_j < matrix[0].size() && flag[index_i][index_j]) {
+			flag[index_i][index_j] = false;
+			result.push_back(matrix[index_i][index_j]);
+			//left
+			index_j += 1;
+			while (index_j < matrix[0].size() && flag[index_i][index_j]) {
+				flag[index_i][index_j] = false;
+				result.push_back(matrix[index_i][index_j]);
+				index_j += 1;
+			}
+			index_j -= 1;
+			//down
+			index_i += 1;
+			while (index_i < matrix.size() && flag[index_i][index_j]) {
+				flag[index_i][index_j] = false;
+				result.push_back(matrix[index_i][index_j]);
+				index_i += 1;
+			}
+			index_i -= 1;
+			//left
+			index_j -= 1;
+			while (index_j >=0 && flag[index_i][index_j]) {
+				flag[index_i][index_j] = false;
+				result.push_back(matrix[index_i][index_j]);
+				index_j -= 1;
+			}
+			index_j += 1;
+			//left
+			index_i -= 1;
+			while (index_i >= 0 && flag[index_i][index_j]) {
+				flag[index_i][index_j] = false;
+				result.push_back(matrix[index_i][index_j]);
+				index_i -= 1;
+			}
+			index_i += 1;
+		}
+	}
+	bool validateStackSequences(vector<int>& pushed, vector<int>& popped) {
+		int i = 0, j = 0;
+		stack<int> temp;
+		for (auto i = pushed.begin(); i != pushed.end(); i++) {
+			temp.push(*i);
+			while (!temp.empty() && (temp.top() == popped[j])) {
+				temp.pop();
+				j++;
+			}
+		}
+		return temp.empty();
+	}
+	//剑指 Offer 32 - I. 从上到下打印二叉树
+	vector<int> levelOrder(TreeNode* root) {
+		queue<TreeNode*> print_queue;
+		vector<int> result;
+		print_queue.push(root);
+		while (!print_queue.empty()) {
+			TreeNode* temp = print_queue.front();
+			print_queue.pop();
+			if (temp)
+				continue;
+			else {
+				result.push_back(temp->val);
+				print_queue.push(temp->left);
+				print_queue.push(temp->right);
+			}
+		}
+		return result;
+	}
+	//剑指 Offer 32 - II.从上到下打印二叉树 II
+	vector<vector<int>> levelOrder_II(TreeNode* root) {
+		queue<pair<TreeNode*, int>> print_queue;
+		vector<int> result;
+		vector<vector<int>> final_result;
+		print_queue.push(make_pair(root, 0));
+		int cur_level = 0;
+		while (!print_queue.empty()) {
+			pair<TreeNode*,int> temp = print_queue.front();
+			print_queue.pop();
+			if (temp.second != cur_level) {
+				cur_level = temp.second;
+				final_result.push_back(result);
+				result.clear();
+			}
+			if (!temp.first)
+				continue;
+			else {
+				result.push_back(temp.first->val);
+				print_queue.push(make_pair(temp.first->left, cur_level + 1));
+				print_queue.push(make_pair(temp.first->right, cur_level + 1));
+			}			
+		}
+		return final_result;
+	}
+	//剑指 Offer 32 - III. 从上到下打印二叉树 III
+	vector<vector<int>> levelOrde_III(TreeNode* root) {
+		stack<pair<TreeNode*, int>> cur_stack;
+		stack<pair<TreeNode*, int>> next_stack;
+		vector<int> result;
+		vector<vector<int>> final_result;
+		cur_stack.push(make_pair(root, 1));
+		int cur_level = 1;
+		while (!cur_stack.empty()) {
+			pair<TreeNode*, int> temp = cur_stack.top();
+			cur_stack.pop();
+			if (temp.second != cur_level) {
+				cur_level = temp.second;
+				final_result.push_back(result);
+				result.clear();
+			}
+			if (!temp.first) {
+				//当前层打印完毕，替换为下一层
+				if (cur_stack.empty()) {
+					next_stack.swap(cur_stack);
+				}
+				continue;
+			}
+			else {
+				result.push_back(temp.first->val);
+				if (cur_level % 2) {
+					next_stack.push(make_pair(temp.first->left, cur_level + 1));
+					next_stack.push(make_pair(temp.first->right, cur_level + 1));
+				}
+				else {
+					next_stack.push(make_pair(temp.first->right, cur_level + 1));
+					next_stack.push(make_pair(temp.first->left, cur_level + 1));
+
+				}
+			}
+			//当前层打印完毕，替换为下一层
+			if (cur_stack.empty()) {
+				next_stack.swap(cur_stack);
+			}
+		}
+		return final_result;
+	}
+
+	//剑指 Offer 33. 二叉搜索树的后序遍历序列
+	bool verifyPostorder(vector<int>& postorder) {
+		//为空 返回真
+		if (postorder.empty())
+			return true;
+		return recur(postorder, 0, postorder.size() - 1);
+	}
+	bool recur(vector<int>& postorder, int left, int root) {
+		if (left == root)
+			return true;
+		int left_end = left;
+		while ((left_end< root) && (postorder[left_end] < postorder[root]))
+			left_end += 1;
+		int right_end = left_end;
+		while ((right_end< root) && (postorder[right_end] > postorder[root]))
+			right_end += 1;
+		if (right_end != root)
+			return false;
+		//只有左子树
+		if (left_end == right_end)
+			return recur(postorder, left, left_end - 1);
+		//只有右子树
+		if (left_end == left)
+			return recur(postorder, left_end, right_end - 1);
+		//左右子树都有
+		return recur(postorder, left, left_end - 1) && recur(postorder, left_end, right_end - 1);
+	}
+
+	//剑指 Offer 34. 二叉树中和为某一值的路径
+	vector<vector<int>> pathSum(TreeNode* root, int sum) {
+		vector<int> result;
+		vector<vector<int>> final_result;
+		path(root, sum, result, final_result, 0);
+		return final_result;
+
+	}
+	void path(TreeNode *root, int sum, vector<int> result, vector<vector<int>> &final_result, int temp) {
+		if (!root)
+			return;
+		if (!root->left && !root->right && ((temp + root->val) == sum)) {
+			result.push_back(root->val);
+			final_result.push_back(result);
+			result.pop_back();
+			return;
+		}
+		result.push_back(root->val);
+		path(root->left, sum, result, final_result, temp + root->val);
+		path(root->right, sum, result, final_result, temp + root->val);
+	}
+
+	//剑指 Offer 35. 复杂链表的复制
+	Node* copyRandomList(Node* head) {
+		map<Node*, int> node_set;
+		map<int, Node*> new_node_set;
+		vector<int> order;
+		Node* ptr = head;
+		int index = 1;
+		node_set[NULL] = 0;
+		//原来节点地址编号
+		while (ptr) {
+			node_set[ptr] = index;
+			index++;
+			ptr = ptr->next;
+		}
+		ptr = head;
+		index = 1;
+		new_node_set[0] = NULL;
+		Node* new_link = new Node(0);
+		Node *qtr = new_link;
+		//找到各节点random对应的编号
+		while (ptr) {
+			order.push_back(node_set[ptr->random]);
+			qtr->next = new Node(ptr->val);
+			new_node_set[index] = qtr->next;
+			qtr = qtr->next;
+			ptr = ptr->next;
+			index++;
+		}
+		//重新赋值random
+		qtr = new_link->next;
+		for (auto i = order.begin(); i != order.end(); i++) {
+			qtr->random = new_node_set[*i];
+			qtr = qtr->next;
+		}
+		return new_link->next;
+
+	}
+
+	//剑指 Offer 36. 二叉搜索树与双向链表
+	D_Node* treeToDoublyList(D_Node* root) {
+		D_Node *pre = NULL, *head = NULL;
+		recur(root, pre, head);
+		head->left = pre;
+		pre->right = head;
+		return head;
+	}
+	void recur(D_Node *cur, D_Node*& pre, D_Node*& head) {
+		if (!cur)
+			return;
+		recur(cur->left, pre, head);
+		if (pre) {
+			cur->left = pre;
+			pre->right = cur;
+			pre = cur;
+		}
+		else {
+			head = cur;
+			pre = cur;
+		}
+		recur(cur->right, pre, head);
+	}
+
+	//剑指 Offer 38. 字符串的排列
+	vector<string> permutation(string s) {
+		vector<string> res;
+		recur(s, 0, res);
+		return res;
+
+	}
+	void recur(string s, int index,vector<string> &res) {
+		if (index == (s.size() - 1)) {
+			res.push_back(s);
+		}
+		set<char> unique;
+		//依次固定index上字符
+		for (int i = index; i < s.size(); i++) {
+			if (unique.find(s[index]) == unique.end()) {
+				unique.insert(s[i]);
+				swap(s, index, i);
+				recur(s, index + 1, res);
+				swap(s, i, index);
+			}
+		}
+	}
+	void swap(string &s, int index1, int index2) {
+		char temp = s[index1];
+		s[index1] = s[index2];
+		s[index2] = temp;
+	}
+
+	//剑指 Offer 39. 数组中出现次数超过一半的数字
+	bool cmp(pair<int, int> num1, pair<int, int> num2) {
+		return num1.second > num2.second;
+	}
+	int majorityElement(vector<int>& nums) {
+		map<int, int> nums_set;
+		for (auto i = nums.begin(); i!= nums.end(); i++) {
+			if (nums_set.find(*i) == nums_set.end()) {
+				nums_set[*i] = 1;
+			}
+			else {
+				nums_set[*i] += 1;
+			}
+			if (nums_set[*i] > (nums.size() / 2))
+				return *i;
+		}
+	}
+
+	//剑指 Offer 40. 最小的k个数
+	vector<int> getLeastNumbers(vector<int>& arr, int k) {
+		//默认最大堆
+		priority_queue<int> nums_k;
+		vector<int> res;
+		for (auto i = arr.begin(); i != arr.end(); i++) {
+			if (nums_k.size() < k)
+				nums_k.push(*i);
+			else {
+				if (*i < nums_k.top()) {
+					nums_k.pop();
+					nums_k.push(*i);
+				}
+			}
+		}
+		for (int i = 0; i < nums_k.size(); i++) {
+			res.push_back(nums_k.top());
+			nums_k.pop();
+		}
+		return res;
+
+	}
 };
