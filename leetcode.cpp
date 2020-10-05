@@ -1347,4 +1347,133 @@ int stringInput() {
 		}
 		return st == STATE_INTEGER || st == STATE_POINT || st == STATE_FRACTION || st == STATE_EXP_NUMBER || st == STATE_END;
 	}
+
+	//剑指 Offer 42. 连续子数组的最大和
+	int maxSubArray(vector<int>& nums) {
+		int cur_max = nums[0], max = nums[0];
+		for (auto i = nums.begin()+1; i != nums.end(); i++) {
+			cur_max = (cur_max + *i) > *i ?( cur_max + *i) : *i;
+			max = cur_max > max ? cur_max : max;
+		}
+		return max;
+	}
+
+	//剑指 Offer 43. 1～n整数中1出现的次数
+	int countDigitOne(int n) {
+		int high = n / 10, cur = n % 10, res = 0, low = 0;
+		long digit = 1;
+		while (high || cur) {
+			if (cur == 0)
+				res = res + high*digit;
+			else if (cur == 1) {
+				res = res + high*digit + low + 1;
+			}
+			else
+				res = (high + 1)*digit + res;
+			low += cur * digit;
+			cur = high % 10;
+			high = high / 10;
+			digit = digit * 10;
+		}
+		return res;
+	}
+	//剑指 Offer 44. 数字序列中某一位的数字
+	int findNthDigit(int n) {
+		int digit = 1;
+		long start = 1;
+		long count = 9;
+		while (n > count) { // 1.
+			n -= count;
+			digit += 1;
+			start *= 10;
+			count = digit * start * 9;
+		}
+		long num = start + (n - 1) / digit; // 2.
+		return to_string(num)[(n - 1) % digit] - '0'; // 3.
+	}
+
+	//剑指 Offer 45. 把数组排成最小的数
+	bool cmp(string s1, string s2) {
+		return (s1 + s2) < (s2 + s1);
+	}
+	string minNumber(vector<int>& nums) {
+		vector<string> nums_string;
+		for (auto i = nums.begin(); i != nums.end(); i++) {
+			nums_string.push_back(to_string(*i));
+		}
+		sort(nums_string.begin(), nums_string.end(), cmp);
+		string res;
+		for (auto i = nums_string.begin(); i != nums_string.end(); i++) {
+			res = res + *i;
+		}
+		return res;
+	}
+
+	//剑指 Offer 46. 把数字翻译成字符串
+	int translateNum(int num) {
+		if (num == 0 || (num<10))
+			return 1;
+		int temp1 = num % 100;
+		int res;
+		if (temp1<26 && temp1>9)
+			res = translateNum(num / 100) + translateNum(num / 10);
+		else
+			res = translateNum(num / 10);
+		return res;
+	}
+};
+
+//剑指 Offer 41. 数据流中的中位数
+class MedianFinder {
+public:
+	/** initialize your data structure here. */
+	//大顶堆保存小的部分数据
+	priority_queue<int> max_data;
+	//小顶堆保存大的部分数据
+	priority_queue<int,vector<int>,greater<int> > min_data;
+	MedianFinder() {
+	}
+	void addNum(int num) {
+		if ((max_data.size() + min_data.size()) == 0)
+			max_data.push(num);
+		else {
+			if (max_data.size() == min_data.size()) {
+				if (num < min_data.top())
+					max_data.push(num);
+				else
+					min_data.push(num);
+			}
+			else if (max_data.size() < min_data.size()) {
+				if (num > min_data.top()) {
+					int temp = min_data.top();
+					min_data.pop();
+					min_data.push(num);
+					max_data.push(temp);
+				}
+				else
+					max_data.push(num);
+			}
+			else {
+				if (num < max_data.top()) {
+					int temp = max_data.top();
+					max_data.pop();
+					max_data.push(num);
+					min_data.push(temp);
+				}
+				else
+					min_data.push(num);
+			}
+		}
+	}
+
+	double findMedian() {
+		double result;
+		if (max_data.size() == min_data.size())
+			result = (max_data.top() + min_data.top()) / 2.0;
+		else if (max_data.size() > min_data.size())
+			result = max_data.top();
+		else
+			result = min_data.top();
+		return result;
+	}
 };
