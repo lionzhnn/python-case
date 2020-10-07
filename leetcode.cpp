@@ -1421,6 +1421,283 @@ int stringInput() {
 			res = translateNum(num / 10);
 		return res;
 	}
+//剑指 Offer 47. 礼物的最大价值
+	//递归 
+	int maxValue(vector<vector<int>>& grid) {
+		return recur(0, 0, grid);
+	}
+	int recur(int i_begin, int j_begin, vector<vector<int>>& grid) {
+		int i = i_begin, j = j_begin;
+		int res = grid[i_begin][j_begin];
+		//到了右下角
+		if (i == (grid.size() - 1) && j == (grid[0].size() - 1))
+			return res;
+		//只能往右走
+		else if (i == (grid.size() - 1))
+			res += recur(i, j + 1, grid);
+		//只能往下走
+		else if (j == (grid[0].size() - 1))
+			res += recur(i + 1, j, grid);
+		//往下或者右走
+		else {
+			int res_right = recur(i, j + 1, grid);
+			int res_down = recur(i + 1, j, grid);
+			if (res_down>res_right)
+				res += res_down;
+			else
+				res += res_right;
+		}
+		return res;
+	}
+	//动态规划
+	int maxValue_II(vector<vector<int>>& grid) {
+		vector<vector<int>> dp(grid.size(), vector<int>(grid[0].size(), 0));
+		dp[0][0] = grid[0][0];
+		//第一行
+		for (int i = 1; i < grid[0].size(); i++)
+			dp[0][i] = dp[0][i - 1]+grid[0][i];
+		//第一列
+		for (int i = 1; i < grid.size(); i++)
+			dp[i][0] = dp[i-1][0]+grid[i][0];
+		for (int i = 1; i < grid.size(); i++) {
+			for (int j = 1; j < grid[0].size(); j++) {
+				dp[i][j] = max(dp[i - 1][j], dp[i][j - 1]) + grid[i][j];
+			}
+		}
+		return dp[grid.size() - 1][grid[0].size() - 1];
+	}
+	//剑指 Offer 48. 最长不含重复字符的子字符串
+	int lengthOfLongestSubstring(string s) {
+		int maxLen = 0;
+		if (s.size() == 0) return 0;
+		unordered_set<char> chars;
+		int right = 0;
+		for (int left = 0; left < s.size(); left++) {
+			while (right < s.size() && !chars.count(s[right])) {
+				chars.insert(s[right]);
+				right++;
+			}
+			maxLen = max(maxLen, right - left);
+			if (right == s.size()) break;
+			chars.erase(s[left]);
+		}
+		return maxLen;
+	}
+	//剑指 Offer 49. 丑数
+	int min(int x1, int x2, int x3) {
+		int temp = x1<x2 ? x1 : x2;
+		return temp<x3 ? temp : x3;
+	}
+	int nthUglyNumber(int n) {
+		vector<int> dp(n, 0);
+		dp[0] = 1;
+		int p1 = 0, p2 = 0, p3 = 0;
+		for (int i = 1; i<n; i++) {
+			dp[i] = min(dp[p1] * 2, dp[p2] * 3, dp[p3] * 5);
+			if (dp[i] == dp[p1] * 2)
+				p1++;
+			if (dp[i] == dp[p2] * 3)
+				p2++;
+			if (dp[i] == dp[p3] * 5)
+				p3++;
+		}
+		return dp[n - 1];
+	}
+
+	//剑指 Offer 50. 第一个只出现一次的字符
+	//count函数
+	char firstUniqChar(string s) {
+		set<char> char_in_s;
+		for (int i = 0; i < s.size(); i++) {
+			if (char_in_s.find(s[i]) == char_in_s.end()) {
+				char_in_s.insert(s[i]);
+				if (count(s.begin(), s.end(), s[i]) == 1)
+					return s[i];
+			}
+		}
+		return ' ';
+	}
+	//哈希表
+	char firstUniqChar_II(string s) {
+		unsigned int char_in_s[128]{ 0 };
+		for (char c : s) {
+			char_in_s[c]++;
+		}
+		for (int i = 0; i < s.size(); i++) {
+			if (char_in_s[s[i]] == 1)
+				return s[i];
+		}
+		return ' ';
+	}
+
+	//剑指 Offer 51. 数组中的逆序对
+	//双层循环 超时
+	int reversePairs(vector<int>& nums) {
+		vector<int> dp(nums.size(), 0);
+		dp[nums.size() - 1] = 0;
+		for (int i = nums.size() - 2; i >= 0; i--) {
+			int temp = 0;
+			for (int j = i + 1; j < nums.size(); j++) {
+				if (nums[i] > nums[j])
+					temp += 1;
+			}
+			dp[i] = temp;
+		}
+		return accumulate(dp.begin(), dp.end(), 0);
+	}
+	//归并排序
+	int reversePairs_II(vector<int>& nums) {
+		int n = nums.size();
+		vector<int> tmp(n);
+		return recur(0, n - 1,nums,tmp);
+	}
+	int recur(int left, int right, vector<int>& nums,vector<int> &temp_nums) {
+		if (left >= right)
+			return 0;
+		int mid = left + (right - left) / 2;
+		int res = recur(left, mid, nums, temp_nums) + recur(mid + 1, right, nums, temp_nums);
+		int p1 = left, p2 = mid + 1, pos = left;
+		while (p1 <= mid && p2 <= right) {
+			if (nums[p1] <= nums[p2]) {
+				temp_nums[pos++] = nums[p1];
+				p1++;
+				res += (p2 - (mid + 1));
+			}
+			else {
+				temp_nums[pos++] = nums[p2];
+				p2++;
+			}
+		}
+		for (int k = p1; k <= mid; ++k) {
+			temp_nums[pos++] = nums[k];
+			res += (p2 - (mid + 1));
+		}
+		for (int k = p2; k <= right; ++k) {
+			temp_nums[pos++] = nums[k];
+		}
+		copy(temp_nums.begin() + left, temp_nums.begin() + right + 1, nums.begin() + left);
+		return res;
+	}
+
+	//剑指 Offer 52. 两个链表的第一个公共节点
+	//链表长度
+	int len(ListNode *head) {
+		ListNode *temp = head;
+		int res = 0;
+		while (temp) {
+			temp = temp->next;
+			res++;
+		}
+		return res;
+	}
+	ListNode *getIntersectionNode(ListNode *headA, ListNode *headB) {
+		if (!headA || !headB)
+			return NULL;
+		int lenA = len(headA);
+		int lenB = len(headB);
+		ListNode *ptrA = headA, *ptrB = headB;
+		//将链表对齐
+		if (lenA > lenB) {
+			while (lenA > lenB) {
+				ptrA = ptrA->next;
+				lenA--;
+			}
+		}
+		else {
+			while (lenB > lenA) {
+				ptrB = ptrB->next;
+				lenB--;
+			}
+		}
+		//找公共链表
+		while (ptrA && ptrB && (ptrA->val != ptrB->val || ptrA != ptrB)) {
+			ptrA = ptrA->next;
+			ptrB = ptrB->next;
+		}
+		return ptrA;
+	}
+
+	//剑指 Offer 53 - I. 在排序数组中查找数字 I
+	int search(vector<int>& nums, int target) {
+		return helper(nums, target) - helper(nums, target - 1);
+	}
+	int helper(vector<int>& nums, int tar) {
+		int i = 0, j = nums.size() - 1;
+		while (i <= j) {
+			int m = (i + j) / 2;
+			if (nums[m] <= tar) i = m + 1;
+			else j = m - 1;
+		}
+		return i;
+	}
+
+	//剑指 Offer 53 - II. 0～n-1中缺失的数字
+	//遍历
+	int missingNumber(vector<int>& nums) {
+		int i;
+		for (i = 0; i<nums.size(); i++) {
+			if (nums[i] != i)
+				return i;
+		}
+		return i;
+	}
+	//二分法
+	int missingNumber_II(vector<int>& nums) {
+		int beg = 0, end = nums.size() - 1, mid;
+		while (beg <= end) {
+			mid = beg + (end - beg) / 2;
+			if (nums[mid] == mid)
+				beg = end + 1;
+			else
+				end = mid - 1;
+		}
+		return beg;
+	}
+
+	//剑指 Offer 54. 二叉搜索树的第k大节点
+	//右 根 左 访问树 可得到递减的数组
+	int res, k;
+	int kthLargest(TreeNode* root, int k) {
+		this->k = k;
+		recur(root);
+		return res;
+	}
+	void recur(TreeNode* root) {
+		if (!root)
+			return;
+		recur(root->right);
+		if (this->k == 0)
+			return;
+		this->k -= 1;
+		if (this->k == 0)
+			res = root->val;
+		recur(root->left);
+	}
+
+	//剑指 Offer 55 - I. 二叉树的深度
+	int maxDepth(TreeNode* root) {
+		if (!root)
+			return 0;
+		int len_left = maxDepth(root->left);
+		int len_right = maxDepth(root->right);
+		return len_left>len_right ? len_left + 1 : len_right + 1;
+	}
+
+	//剑指 Offer 55 - II. 平衡二叉树
+	bool isBalanced(TreeNode* root) {
+		if (!root)
+			return true;
+		int len_left = maxDepth(root->left);
+		int len_right = maxDepth(root->right);
+		return (abs(len_left - len_right) <2) && isBalanced(root->left) && isBalanced(root->right);
+	}
+	int maxDepth(TreeNode* root) {
+		if (!root)
+			return 0;
+		int len_left = maxDepth(root->left);
+		int len_right = maxDepth(root->right);
+		return len_left>len_right ? len_left + 1 : len_right + 1;
+	}
 };
 
 //剑指 Offer 41. 数据流中的中位数
@@ -1476,4 +1753,6 @@ public:
 			result = min_data.top();
 		return result;
 	}
+	
+	
 };
